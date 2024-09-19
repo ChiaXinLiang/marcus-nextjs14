@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, React, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -142,7 +142,10 @@ const Question = ({ mangoUserId }: Props) => {
               <FormControl className="mt-3.5">
                 <Editor
                   apiKey={process.env.NEXT_PUBLIC_TINY_EDITOR_API_KEY}
-                  onInit={(_evt, editor) => (editorRef.current = editor)}
+                  onInit={(_evt, editor) => {
+                    // @ts-ignore
+                    editorRef.current = editor;
+                  }}
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
                   initialValue=""
