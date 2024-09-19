@@ -2,7 +2,7 @@
 
 import User from "@/database/user.model";
 import { connectToDatabase } from "../mangoose";
-import { error } from "console";
+// import { error } from "console";
 import {
   CreateUserParams,
   DeleteUserParams,
@@ -26,7 +26,7 @@ export async function getUserById(params: any) {
   }
 }
 
-export async function createUser(userParam: CreateUserParams) {
+export async function createUser(userData: CreateUserParams) {
   try {
     connectToDatabase();
     const newUser = await User.create(userData);
@@ -65,6 +65,7 @@ export async function deleteUser(params: DeleteUserParams) {
     // and questions, answers, comments, etc.
 
     // get question id
+    // eslint-disable-next-line no-unused-vars
     const userQuestionIds = await Question.find({ author: user._id }).distinct(
       "_id"
     );
