@@ -1,14 +1,15 @@
 "use client";
 import { upvoteAnswer, downvoteAnswer } from "@/lib/actions/answer.action";
+import { viewQuestion } from "@/lib/actions/interaction.action";
 import {
   downvoteQuestion,
   upvoteQuestion,
 } from "@/lib/actions/question.action";
 import { toggleSaveQuestion } from "@/lib/actions/user.action";
-import { formatAndDevideNumber } from "@/lib/utils";
+import { formatAndDivideNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface Props {
   type: string;
@@ -88,6 +89,13 @@ const Votes = ({
     }
   };
 
+  useEffect(() => {
+    viewQuestion({
+      questionId: JSON.parse(itemId),
+      userId: userId ? JSON.parse(userId) : undefined,
+    });
+  }, [itemId, userId, pathname, router]);
+
   return (
     <div className="flex gap-5">
       <div className="flex-center gap-2.5">
@@ -107,7 +115,7 @@ const Votes = ({
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium text-dark400_light900">
-              {formatAndDevideNumber(upvotes)}
+              {formatAndDivideNumber(upvotes)}
             </p>
           </div>
         </div>
@@ -128,7 +136,7 @@ const Votes = ({
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium text-dark400_light900">
-              {formatAndDevideNumber(downvotes)}
+              {formatAndDivideNumber(downvotes)}
             </p>
           </div>
         </div>

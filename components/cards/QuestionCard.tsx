@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import RenderTag from "../shared/RenderTag";
 import Metric from "../shared/Metric";
-import { formatAndDevideNumber, getTimestamp } from "@/lib/utils";
+import { formatAndDivideNumber, getTimestamp } from "@/lib/utils";
 
 interface QuestionProps {
   _id: string;
@@ -71,7 +71,7 @@ const QuestionCard = ({
         <Metric
           imgUrl="assets/icons/like.svg"
           alt="Upvotes"
-          value={formatAndDevideNumber(upvotes.length)}
+          value={formatAndDivideNumber(upvotes.length)}
           title=" Votes"
           textStyles="small-medium text-dark400_light800"
         />
@@ -79,7 +79,7 @@ const QuestionCard = ({
         <Metric
           imgUrl="assets/icons/message.svg"
           alt="message"
-          value={formatAndDevideNumber(answers.length)}
+          value={formatAndDivideNumber(answers.length)}
           title=" Answers"
           textStyles="small-medium text-dark400_light800"
         />
@@ -87,7 +87,7 @@ const QuestionCard = ({
         <Metric
           imgUrl="assets/icons/eye.svg"
           alt="eye"
-          value={formatAndDevideNumber(views)}
+          value={formatAndDivideNumber(views)}
           title=" views"
           textStyles="small-medium text-dark400_light800"
         />
