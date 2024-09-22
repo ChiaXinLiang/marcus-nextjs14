@@ -16,11 +16,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { QuestionSchema } from "@/lib/validation";
+import { QuestionSchema } from "@/lib/validations";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { createQuestion } from "@/lib/actions/question.action";
 import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "@/context/ThemeProvider";
 
 const type: any = "create";
 
@@ -29,6 +30,7 @@ interface Props {
 }
 
 const Question = ({ mangoUserId }: Props) => {
+  const { mode } = useTheme();
   const editorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -171,12 +173,15 @@ const Question = ({ mangoUserId }: Props) => {
                       "code",
                       "help",
                       "wordcount",
+                      "codesample",
                     ],
                     toolbar:
-                      "undo redo  |" +
-                      "codesample | bold italic forecolor | alignleft aligncenter " +
+                      "undo redo |codesample " +
+                      " | bold italic forecolor | alignleft aligncenter " +
                       "alignright alignjustify | bullist numlist ",
                     content_style: "body { font-family:Inter; font-size:16px }",
+                    skin: mode === "dark" ? "oxide-dark" : "oxide",
+                    content_css: mode === "dark" ? "dark" : "light",
                   }}
                 />
               </FormControl>
