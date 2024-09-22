@@ -20,9 +20,11 @@ interface QuestionProps {
   views: number;
   answers: Array<object>;
   createdAt: Date;
+  clerkId?: string | null;
 }
 
 const QuestionCard = ({
+  clerkId,
   _id,
   title,
   tags,
@@ -49,11 +51,7 @@ const QuestionCard = ({
 
       <div className="mt-3.5 flex flex-wrap gap-2">
         {tags.map((tag) => (
-          <RenderTag
-            key={tag._id}
-            _id={tag._id}
-            name={tag.name}
-          />
+          <RenderTag key={tag._id} _id={tag._id} name={tag.name} />
         ))}
       </div>
 
