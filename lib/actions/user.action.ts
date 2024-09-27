@@ -17,6 +17,7 @@ import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import Answer from "@/database/answer.model";
+import { skip } from "node:test";
 
 export async function getUserById(params: any) {
   try {
@@ -25,7 +26,6 @@ export async function getUserById(params: any) {
     const { userId } = params;
 
     const user = await User.findOne({ clerkId: userId });
-
     return user;
   } catch (error) {
     console.log(error);
@@ -99,11 +99,45 @@ export async function getAllUsers(params: GetAllUsersParams) {
   try {
     connectToDatabase();
 
-    // const { page = 1, pageSize = 20, filter, searchQuery } = params;
+    const { searchQuery, filter, page = 1, pageSize = 10 } = params;
 
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const skipAmount = (page - 1) * pageSize;
 
-    return { users };
+    const query: FilterQuery<typeof User> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: new RegExp(searchQuery, "i") } },
+        { username: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
+    let sortOptions = {};
+
+    switch (filter) {
+      case "new_users":
+        sortOptions = { joinedAt: -1 };
+        break;
+      case "old_users":
+        sortOptions = { joinedAt: 1 };
+        break;
+      case "top_contributors":
+        sortOptions = { reputation: -1 };
+        break;
+      default:
+        break;
+    }
+
+    const users = await User.find(query)
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    const totalUsers = await Question.countDocuments(query);
+
+    const isNext = totalUsers > skipAmount + users.length;
+
+    return { users, isNext };
   } catch (error) {
     console.log(error);
     throw error;
@@ -156,7 +190,32 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
     connectToDatabase();
 
     // eslint-disable-next-line no-unused-vars
-    const { clerkId, page = 1, pageSize = 10, filter, searchQuery } = params;
+    const { clerkId, filter, searchQuery, page = 1, pageSize = 1 } = params;
+
+    const skipAmount = (page - 1) * pageSize;
+
+    let sortOptions = {};
+
+    switch (filter) {
+      case "most_recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "most_voted":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "most_viewed":
+        sortOptions = { views: -1 };
+        break;
+      case "most_answered":
+        sortOptions = { answers: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+        break;
+    }
 
     const query: FilterQuery<typeof Question> = searchQuery
       ? { title: { $regex: new RegExp(searchQuery, "i") } }
@@ -166,7 +225,9 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
       path: "saved",
       match: query,
       options: {
-        sort: { createdAt: -1 },
+        sort: sortOptions,
+        skip: skipAmount,
+        limit: pageSize + 1,
       },
       populate: [
         { path: "tags", model: Tag, select: "_id name" },
@@ -174,12 +235,14 @@ export async function getSavedQuestions(params: GetSavedQuestionsParams) {
       ],
     });
 
+    const isNext = user.saved.length > pageSize;
+
     if (!user) {
       throw new Error("User not found");
     }
 
     const savedQuestions = user.saved;
-    return { questions: savedQuestions };
+    return { questions: savedQuestions, isNext };
   } catch (error) {
     console.log(error);
     throw error;
@@ -215,19 +278,26 @@ export async function getUserQuestions(params: GetUserStatsParams) {
   try {
     connectToDatabase();
     // eslint-disable-next-line no-unused-vars
-    const { userId, page = 1, pageSize = 10 } = params;
+    const { userId, page = 1, pageSize = 2 } = params;
+
+    const skipAmount = (page - 1) * pageSize;
     const totalQuestions = await Question.countDocuments({
       author: userId,
     });
 
     const userQuestions = await Question.find({ author: userId })
       .sort({ views: -1, upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
       .populate("tags", "_id name")
       .populate("author", "_id clerkId name picture");
+
+    const isNextQuestions = totalQuestions > skipAmount + userQuestions.length;
 
     return {
       totalQuestions,
       questions: userQuestions,
+      isNextQuestions,
     };
   } catch (error) {
     console.log(error);
@@ -239,19 +309,26 @@ export async function getUserAnswers(params: GetUserStatsParams) {
   try {
     connectToDatabase();
     // eslint-disable-next-line no-unused-vars
-    const { userId, page = 1, pageSize = 10 } = params;
+    const { userId, page = 1, pageSize = 2 } = params;
+
+    const skipAmount = (page - 1) * pageSize;
     const totalAnswers = await Answer.countDocuments({
       author: userId,
     });
 
     const userAnswers = await Answer.find({ author: userId })
       .sort({ upvotes: -1 })
+      .skip(skipAmount)
+      .limit(pageSize)
       .populate("question", "_id title")
       .populate("author", "_id clerkId name picture");
+
+    const isNextAnswers = totalAnswers > skipAmount + userAnswers.length;
 
     return {
       totalAnswers,
       answers: userAnswers,
+      isNextAnswers,
     };
   } catch (error) {
     console.log(error);

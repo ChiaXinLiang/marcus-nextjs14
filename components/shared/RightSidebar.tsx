@@ -1,41 +1,16 @@
+"use server";
+
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import RenderTag from "./RenderTag";
+import { getHotQuestions } from "@/lib/actions/question.action";
+import { getHotPopularTags } from "@/lib/actions/tag.actions";
 
-const RightSidebar = () => {
-  const hotQuestions = [
-    {
-      _id: "1",
-      title: "How to implement authentication in a React Native app?",
-    },
-    {
-      _id: "2",
-      title:
-        "What are the best practices for optimizing database queries in Django?",
-    },
-    {
-      _id: "3",
-      title:
-        "How to handle state management in a large-scale Vue.js application?",
-    },
-    {
-      _id: "4",
-      title: "What are the key differences between REST and GraphQL APIs?",
-    },
-    {
-      _id: "5",
-      title: "How to implement real-time updates using WebSockets in Node.js?",
-    },
-  ];
+const RightSidebar = async () => {
+  const hotQuestions = await getHotQuestions();
 
-  const popularTags = [
-    { _id: "1", name: "Javascript", totalQuestions: 5 },
-    { _id: "2", name: "React", totalQuestions: 10 },
-    { _id: "3", name: "Vue", totalQuestions: 15 },
-    { _id: "4", name: "Next.js", totalQuestions: 20 },
-    { _id: "5", name: "Django", totalQuestions: 25 },
-  ];
+  const popularTags = await getHotPopularTags();
   return (
     <section
       className="background-light900_dark200 
@@ -47,7 +22,7 @@ const RightSidebar = () => {
       <div>
         <h3 className="h3-bold text-dark200_light900">Top Questions</h3>
         <div className="mt-7 flex w-full flex-col gap-[30px]">
-          {hotQuestions.map((question) => (
+          {hotQuestions.map((question: any) => (
             <Link
               href={`/question/${question._id}`}
               key={question._id}
@@ -69,14 +44,14 @@ const RightSidebar = () => {
       </div>
 
       <div className="mt-16">
-        <h3 className="h3-bold text-dark200_light900">Popular Tags</h3>
+        <h3 className="h3-bold text-dark200_light900"></h3>
         <div className="mt-7 flex flex-col gap-4">
           {popularTags.map((tag) => (
             <RenderTag
               key={tag._id}
               _id={tag._id}
               name={tag.name}
-              totalQuestions={tag.totalQuestions}
+              totalQuestions={tag.numberOfQuestions}
               showCount
             />
           ))}
